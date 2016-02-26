@@ -8,6 +8,7 @@
 
 {% block content %}
 <div class="jumbotron">
+	<div class="container" id="buttons"></div>
 	<div class="container" id="app"></div>
 </div>
 {% endblock %}
@@ -18,4 +19,5 @@
 <script type="text/javascript">
 window.currentUser = "{{ user.username }}"
 </script>
+<script src="//localhost:35729/livereload.js"></script>
 {% endblock %}

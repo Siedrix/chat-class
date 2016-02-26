@@ -48,7 +48,7 @@ router.post('/', function(req, res){
 	})
 })
 
-router.put('/:uuid', function(req, res){
+router.put('/:uuid/', function(req, res){
 	Messages.findOne({uuid: req.params.uuid}, function(err, doc){
 		if(err){
 			return res.send(500, 'Internal server error')
@@ -59,7 +59,7 @@ router.put('/:uuid', function(req, res){
 		}
 
 		if( !doc.user.equals( res.locals.user._id ) ) {
-			return res.send(403, 'Not found')
+			return res.send(403, 'Forbidden')
 		}
 
 		doc.content = req.body.content
@@ -88,7 +88,7 @@ router.delete('/:uuid', function(req, res){
 		}
 
 		if( !doc.user.equals( res.locals.user._id ) ) {
-			return res.send(403, 'Not found')
+			return res.send(403, 'Forbidden')
 		}
 
 		doc.remove(function(){

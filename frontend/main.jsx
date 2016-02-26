@@ -4,8 +4,14 @@ var _ = window._ = require('underscore')
 var React = require('react')
 var ReactDOM = require('react-dom')
 
-var Backbone = require('Backbone')
+var Backbone = require('backbone')
 var Mixins = require('backbone-react-component')
+
+var StateModel = Backbone.Model.extend({
+	defaults:{
+		chat: 'show'
+	}
+})
 
 var MessagesModel = Backbone.Model.extend({
 	urlRoot: '/api/v1/messages',
@@ -18,6 +24,12 @@ var MessagesCollection = Backbone.Collection.extend({
 })
 
 var messages = new MessagesCollection()
+
+var state = new StateModel( JSON.parse( window.localStorage.getItem('state') ) || {})
+state.on('change', function(){
+	window.localStorage.setItem('state', JSON.stringify(window.datalayer.state.toJSON()) )
+})
+
 messages.on('add', function(model){
 	console.log('Adding', model.get('uuid'))
 })
@@ -46,12 +58,12 @@ var ChatAppSimple = React.createClass({
 		console.log('Adding',this.state.content)
 
 		this.state.messages.push({
-			content: this.state.content
+			content: this.state.content,
+			uuid: _.uniqueId()
 		})
 
 		this.setState({
 			content:'',
-			uuid: _.uniqueId()
 		})
 
 		console.log('Messages',this.state.messages)
@@ -140,6 +152,10 @@ var ChatApp = React.createClass({
 		})
 	},
 	render: function() {
+		if(this.props.model.get('chat') === 'hide'){
+			return (<div></div>)
+		}
+
 		var comments = this.props.collection.map(function(message){
 			var uuid = message.get('uuid')
 
@@ -178,14 +194,46 @@ var ChatApp = React.createClass({
 	}
 })
 
+var Buttons = React.createClass({
+	mixins: [Mixins],
+	showHandler: function(){
+		console.log('Hi')
+
+		this.props.model.set('chat', 'show')
+	},
+	hideHandler: function(){
+		console.log('bye')
+
+		this.props.model.set('chat', 'hide')
+	},
+	render: function(){
+		var button
+		if( this.props.model.get('chat') === 'hide' ){
+			button = <button onClick={this.showHandler}>Show chat</button>
+		}else{
+			button = <button onClick={this.hideHandler}>Hide chat</button>
+
+		}
+
+		return (<div>
+			{button}
+		</div>)
+	}
+})
  
 ReactDOM.render(
-	<ChatApp collection={messages}/>,
+	<ChatApp collection={messages} model={state}/>,
 	document.getElementById('app')
 )
 
+ReactDOM.render(
+	<Buttons model={state}/>,
+	document.getElementById('buttons')
+)
+
 window.datalayer = {
-	messages: messages
+	messages: messages,
+	state:state
 }
 
 window.Data = {

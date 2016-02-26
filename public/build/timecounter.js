@@ -52,7 +52,8 @@
 	
 		getInitialState: function () {
 			return {
-				time: new Date()
+				time: new Date(),
+				counter: 2
 			};
 		},
 		componentDidMount: function () {
@@ -62,6 +63,12 @@
 					time: new Date()
 				});
 			}, 1000);
+		},
+		componentWillUnmount: function () {},
+		clickHandler: function () {
+			this.setState({
+				counter: this.state.counter + 1
+			});
 		},
 		render: function () {
 			var date = this.state.time.toString();
@@ -73,6 +80,20 @@
 					'p',
 					null,
 					date
+				),
+				React.createElement(
+					'p',
+					null,
+					this.state.counter
+				),
+				React.createElement(
+					'p',
+					null,
+					React.createElement(
+						'button',
+						{ onClick: this.clickHandler },
+						'Click Me'
+					)
 				)
 			);
 		}
@@ -84,8 +105,16 @@
 		render: function () {
 			return React.createElement(
 				'div',
-				null,
-				'Hello world'
+				{ className: 'container' },
+				React.createElement(
+					'div',
+					{ className: 'row' },
+					React.createElement(
+						'h2',
+						null,
+						'Hola mundo!!!'
+					)
+				)
 			);
 		}
 	});

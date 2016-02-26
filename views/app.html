@@ -8,15 +8,14 @@
 
 {% block content %}
 <div class="jumbotron">
-	<div class="container">
-		<h1>Welcome to chat example</h1>
-		<p>Add a description of the proyect here</p>
-	</div>
+	<div class="container" id="app"></div>
 </div>
-
-<div id="time-counter"></div>
 {% endblock %}
 
 {% block js %}
-<script src="/assets/build/timecounter.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/assets/build/main.js"></script>
+<script type="text/javascript">
+window.currentUser = "{{ user.username }}"
+</script>
 {% endblock %}

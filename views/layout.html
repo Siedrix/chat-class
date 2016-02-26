@@ -19,7 +19,7 @@
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="/"><% Proyect name %></a>
+				<a class="navbar-brand" href="/">Chat example</a>
 			</div>
 			<div id="navbar" class="collapse navbar-collapse pull-right">
 				{% if user %}
@@ -40,6 +40,7 @@
 	{% block content %}{% endblock %}
 
     <script src="/assets/vendors/jquery-2.2.0.min.js"></script>
-    <script src="/assets/vendors/bootstrap/js/bootstrap.min.js"></script>	
+    <script src="/assets/vendors/bootstrap/js/bootstrap.min.js"></script>
+	{% block js %}{% endblock %}
 </body>
 </html>

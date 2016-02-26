@@ -4,6 +4,7 @@ var mongoose = require('mongoose')
 var bodyParser = require('body-parser')
 var uuid = require('uuid')
 var bcrypt = require('bcrypt-nodejs')
+var IO = require('socket.io')
 
 var session = require('express-session')
 var RedisStore = require('connect-redis')(session)
@@ -28,11 +29,40 @@ var userSchema = Schema({
 })
 
 var User = mongoose.model('User', userSchema)
+
+var messageSchema = Schema({
+	content : String,
+	user: { type: Schema.Types.ObjectId, ref: 'User' },
+	uuid : {type: String, default: uuid.v4},
+	date: { type: Date, default: Date.now }
+})
+
+messageSchema.post('save', function(doc){
+	var data = doc.toJSON()
+
+	data.user = data.user.username
+
+	console.log('Broadcasting', 'message', data.uuid);
+	io.emit('message', data)
+})
+
+messageSchema.post('remove', function(doc){
+	var data = doc.toJSON()
+
+	data.user = data.user.username
+
+	console.log('Broadcasting', 'remove-message', data.uuid);
+	io.emit('remove-message', data)
+})
+
+var Messages = mongoose.model('Message', messageSchema)
 // Termina la declaracion de modelos
 
 // Iniciamos el app de express
 // A la que le agregaremos plugins
 var app = express()
+var server = require('http').Server(app);
+var io = IO(server);
 
 // Add sessions and flash
 var sessionConfig = {
@@ -66,6 +96,7 @@ swig.setDefaults({cache:false})// <-- Cambiar a true en produccion
 
 // Agregamos body parser a express
 app.use( bodyParser.urlencoded({ extended:false }) )
+app.use( bodyParser.json() )
 
 // Agregamos soporte para archivos staticos como css, imagenes y js
 app.use('/assets', express.static('public'));
@@ -90,6 +121,15 @@ app.use(function (req, res, next) {
 // Declara tus url handlers en este espacio
 app.get('/', function (req, res) {
 	res.render('index')
+})
+
+// Declara tus url handlers en este espacio
+app.get('/app', function (req, res) {
+	if(!res.locals.user){
+		return res.send(403, 'Forbidden')
+	}
+
+	res.render('app')
 })
 
 app.get('/profile', function(req, res){
@@ -180,6 +220,9 @@ app.post('/log-in', function (req, res){
 	})
 })
 
+var messageRouter = require('./routers/messages')
+app.use('/api/v1/messages/', messageRouter);
+
 var port = 3000
 // En caso de que nos encontremos en un ambiente de producción, leemos la variable de entorno
 if (process.env.NODE_ENV === 'production') {
@@ -187,6 +230,6 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Termina la declaracion de url handlers
-app.listen(port, function () {
+server.listen(port, function () {
 	console.log('Example app listening on port '+port+'!')
 })
